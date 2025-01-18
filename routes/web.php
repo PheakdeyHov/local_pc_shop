@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
@@ -50,3 +51,12 @@ Route::post('purchases/create' , [PurchaseController::class , 'store'])->name('p
 Route::get('purchases/{id}/edit' , [PurchaseController::class , 'edit'])->name('purchases.edit');
 Route::put('purchases/{id}/edit' , [PurchaseController::class , 'update'])->name('purchases.update');
 Route::delete('purchases/{id}' , [PurchaseController::class , 'destroy'])->name('purchases.destroy');
+
+
+Route::get('customers/search' , [CustomerController::class , 'search'])->name('customers.search');
+Route::get('customers' , [CustomerController::class , 'index'])->name('customers.index');
+Route::get('customers/create' , [CustomerController::class , 'create'])->name('customers.create');
+Route::post('customers/create' , [CustomerController::class , 'store'])->name('customers.store');
+Route::get('customers/{id}/edit' , [CustomerController::class , 'edit'])->name('customers.edit');
+Route::put('customers/{id}/edit' , [CustomerController::class , 'update'])->name('customers.update');
+Route::delete('customers/{id}' , [CustomerController::class , 'destroy'])->name('customers.destroy');

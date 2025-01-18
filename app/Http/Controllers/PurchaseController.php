@@ -86,27 +86,37 @@ class PurchaseController extends Controller
                 if ($validatedData['shipping_status'] === 'recieved') {
                     $this->handleReceivedProduct($product, $purchase);
                 } else {
+                    // Check if the product exists
                     $productModel = Product::where('name', $product['product_name'])->first();
 
-                    if ($productModel) {
-                        // Check if the specification exists
-                        $specification = Specification::where('product_id', $productModel->id)
-                            ->where('specs_value', $product['specs_value'])
-                            ->where('purchase_price', $product['purchase_price'])
-                            ->where('sale_price', $product['sale_price'])
-                            ->where('status', $product['status'])
-                            ->first();
-
-                        // Create the purchase product with or without specification
-                        $this->createNewPurchaseProductWithSpecification(
-                            $product,
-                            $purchase,
-                            $productModel,
-                            $specification // Pass null if specification is not found
-                        );
+                    if (!$productModel) {
+                        // Create purchase product directly if the product doesn't exist
+                        $this->createNewPurchaseProduct($product, $purchase);
+                        continue;
                     }
-                } // Check if the product exists
 
+                    // Check if the specification exists
+                    $specification = Specification::where('product_id', $productModel->id)
+                        ->where('specs_value', $product['specs_value'])
+                        ->where('purchase_price', $product['purchase_price'])
+                        ->where('sale_price', $product['sale_price'])
+                        ->where('status', $product['status'])
+                        ->first();
+
+                    if (!$specification) {
+                        // Create purchase product directly if the specification doesn't exist
+                        $this->createNewPurchaseProduct($product, $purchase);
+                        continue;
+                    }
+
+                    // Optionally, create the purchase product if both product and specification exist
+                    $this->createNewPurchaseProductWithSpecification(
+                        $product,
+                        $purchase,
+                        $productModel,
+                        $specification
+                    );
+                }
             }
         });
 
@@ -187,6 +197,21 @@ class PurchaseController extends Controller
             $this->createNewPurchaseProductWithSpecification($product, $purchase, $newProduct, $newSpecification);
         }
     }
+
+    // Method to create a new purchase product
+private function createNewPurchaseProduct(array $product, Purchase $purchase)
+{
+    $purchase->purchaseProducts()->create([
+        'product_id' => null, // No product ID since it doesn't exist
+        'specification_id' => null, // No specification ID since it doesn't exist
+        'product_name' => $product['product_name'],
+        'specs_value' => $product['specs_value'],
+        'qty' => $product['qty'],
+        'purchase_price' => $product['purchase_price'],
+        'sale_price' => $product['sale_price'],
+        'status' => $product['status'],
+    ]);
+}
 
     private function createNewPurchaseProductWithSpecification(
         array $product,
